@@ -1,0 +1,26 @@
+# Part of CaseFile Earth. Written with AI assistance; see docs/AI_USE.md.
+# What `vercel deploy` uploads: only what tools/vercel_build.sh and the copilot function (api/copilot.ts) need.
+# Everything else stays on this machine (.cache holds GBs of downloaded data; python/ holds the virtual environment).
+/*
+!/api
+!/web
+!/config
+!/examples
+!/results
+!/tools
+!/vercel.json
+!/package.json
+
+# Only the current results build: the site never loads earlier builds (current.json lists them as "previous").
+/results/*
+!/results/current.json
+!/results/r5
+
+# Never the key, never local builds or test output.
+.env
+.env.*
+/web/node_modules
+/web/dist
+/web/dist-offline
+/web/test-results
+/web/playwright-report

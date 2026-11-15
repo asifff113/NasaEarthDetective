@@ -1,0 +1,65 @@
+# Part of CaseFile Earth. Written with AI assistance; see docs/AI_USE.md.
+# Needs: Settings → Pages → Source: GitHub Actions.
+name: deploy
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the site, or a placeholder until web/ exists
+        run: |
+          if [ -f web/package.json ]; then
+            cd web
+            npm ci
+            RESULTS_BASE=./results npm run build
+            # The offline file is built from the same results the site shows.
+            if [ -f ../results/current.json ]; then RESULTS_DIR=../results npm run build:offline; else npm run build:offline; fi
+            cd ..
+            mkdir -p web/dist/results
+            if [ -f results/current.json ]; then
+              cp -R results/. web/dist/results/
+            else
+              # No real results yet: publish the synthetic examples, which the site labels with its banner.
+              id=$(node -p "require('./examples/current.json').buildId")
+              mkdir -p "web/dist/results/$id"
+              cp examples/current.json web/dist/results/current.json
+              cp -R examples/. "web/dist/results/$id/"
+              rm -rf "web/dist/results/$id/golden" "web/dist/results/$id/power"
+            fi
+            cp web/dist-offline/index.html web/dist/casefile-earth-offline.html
+            echo "SITE_DIR=web/dist" >> "$GITHUB_ENV"
+          else
+            mkdir -p _site/results
+            echo '<!doctype html><meta charset="utf-8"><title>CaseFile Earth</title><p>CaseFile Earth: the site is being built.</p>' > _site/index.html
+            cp -R results/. _site/results/
+            echo "SITE_DIR=_site" >> "$GITHUB_ENV"
+          fi
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ env.SITE_DIR }}
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

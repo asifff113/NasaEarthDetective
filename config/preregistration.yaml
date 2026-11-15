@@ -1,0 +1,126 @@
+# CaseFile Earth — pre-registration (docs/03_SCIENCE.md §10; schema schemas/prereg.schema.json)
+#
+# ORDERING RULE: this file is committed with `status: committed` BEFORE anyone computes, prints, plots or
+# looks at a trend in real data. `casefile-engine results` refuses to run otherwise and writes this file's
+# SHA-256 into every result and onto the Methods page.
+#
+# How to fill it in (docs/05_BUILD_PLAN.md, step 4A):
+#   1. Replace every placeholder value (done on 2026-11-13). The other values are recommendations: change any of them now, none later.
+#   2. `uv run casefile-engine prereg-check --bundle <bundle>` prints the hashes, the regions that pass the support
+#      rule with their effective cells, the pairs, and both families.
+#   3. Everyone on the team reads the printed families and is named under signed_by.
+#   4. Set `status: committed` and commit the file. The build reads the commit from git.
+#   5. After that, the file is only amended by adding tests (they become exploration), recorded under `amendments`.
+#
+# A variable from a new dataset is added here (and in config/variables.yaml) before the commit: docs/02_DATA.md §14.
+
+schema: casefile/prereg@3
+status: committed                  # draft | committed
+commit: null                       # leave null: the build reads the commit from git
+signed_by: ["asifff113", "hirok121", "Shakilkhan24"]
+
+hashes:                            # printed by prereg-check
+  analysis_yaml_sha256: "047f79f7730c64b171246a65438c17726ce59726803b391f97ad905496f03159"
+  input_manifest_sha256: "4226ae72bc4da34923a7eaf3a7741db40e9f00688183f32d4b7c3750ebf50f42"
+  regions_support_sha256: "5500691473945c05ae2cbcb6ed1a2a2ca5e776b2b610c931baea183480ef399f"
+
+alpha:
+  confirmatory: 0.05               # Holm across the confirmatory family
+  secondary_q: 0.05                # Benjamini–Hochberg across the secondary family
+  map_q: 0.1                       # Benjamini–Hochberg within each screening map: config/analysis.yaml map.fdr_q (fixed by the schema)
+
+variables:
+  - id: air_temp
+    product: "MERRA-2 M2TMNXSLV 5.12.4, T2M"
+    role: analysed
+    main_window: { first: 1980, last: 2025 }
+    practical_threshold:
+      units: "°C per decade"
+      default: 0.1
+      by_season: {}
+      reason: "About half a degree over the record: the smallest shift we consider worth reporting to a general reader."
+  - id: rain
+    product: "MERRA-2 M2TMNXFLX 5.12.4, PRECTOTCORR"
+    role: analysed
+    main_window: { first: 1980, last: 2025 }
+    practical_threshold:
+      units: "mm per decade"
+      default: 40                    # 2% of 1888.5 mm (Bangladesh, MERRA-2 1980-2025, check-bundle) = 37.8, rounded to 5
+      by_season: {}
+      reason: "Two percent of the mean yearly rain per decade: about a tenth of the yearly total over the record."
+  - id: rain_imerg
+    product: "GPM IMERG V07 Final monthly (GPM_3IMERGM)"
+    role: sensitivity
+    main_window: { first: 1998, last: 2024 }
+    practical_threshold:
+      units: "mm per decade"
+      default: 40
+      by_season: {}
+      reason: "Same as rain."
+
+seasons:
+  main: ANN                        # the schema's name for the primary season
+  secondary: [MAM, JJAS, "ON", DJF]  # pre-monsoon, monsoon, post-monsoon, winter. "ON" is quoted: bare ON is the boolean true in YAML
+  djf_starts_one_year_later: true   # 03 §2.2: a season is dated by the year in which it ends
+
+regions:
+  support_rule: { min_native_cells: 4, max_spill_share: 0.333 }
+  set:                             # every region used by a pair. The build adds each region's effective cells
+    - { id: "country:BGD",     role: home }          # from the bundle (pinned by regions_support_sha256).
+    - { id: "cmp:west_bengal", role: comparison }
+    - { id: "bd_div:khulna",   role: division }
+    - { id: "bd_div:rajshahi", role: division }
+
+pairs:                             # each pair gives three confirmatory tests per analysed variable: A, B and A − B
+  - id: pair_bgd_vs_wb
+    a: "country:BGD"
+    b: "cmp:west_bengal"
+    lead: true
+    question:
+      en: "Has rain changed differently in Bangladesh and in West Bengal?"
+      bn: "বাংলাদেশ ও পশ্চিমবঙ্গে কি বৃষ্টি ভিন্নভাবে বদলেছে?"
+  - id: pair_khulna_vs_rajshahi
+    a: "bd_div:khulna"
+    b: "bd_div:rajshahi"
+    lead: false
+    question:
+      en: "Has rain changed differently in Khulna and in Rajshahi?"
+      bn: "খুলনা ও রাজশাহী বিভাগে কি বৃষ্টি ভিন্নভাবে বদলেছে?"
+
+windows:                           # five alternative windows, robustness checks only (03 §6.4)
+  alternatives:
+    - { id: s3,   start_shift: 3, end_shift: 0 }
+    - { id: s6,   start_shift: 6, end_shift: 0 }
+    - { id: e3,   start_shift: 0, end_shift: -3 }
+    - { id: e6,   start_shift: 0, end_shift: -6 }
+    - { id: s3e3, start_shift: 3, end_shift: -3 }
+
+headline_cases:
+  - { kind: contrast, pair: pair_bgd_vs_wb, variable: rain,     season: ANN }
+  - { kind: contrast, pair: pair_bgd_vs_wb, variable: air_temp, season: ANN }
+
+family_preview:                    # leave empty: the build fills it and prereg-check prints it
+  confirmatory: []
+  secondary: []
+
+amendments:
+  - when: "before any real trend"
+    what: 'secondary seasons: "ON" quoted'
+    reason: "YAML reads a bare ON as true; the build stopped before any statistic. The season is unchanged (post-monsoon, Oct-Nov)."
+    sha256_before: "93c5e55d3ca4b7014dbfcebf6914dd613fc5d86cdf43b4ee873896d66c54eebb"
+  - when: "after"
+    what: "key names as schemas/prereg.schema.json requires (seasons.main, djf_starts_one_year_later, alpha.map_q = analysis.yaml map.fdr_q) and the manifest hash"
+    reason: "The first build's prereg.json failed its schema and the manifest provider was renamed to the provenance route 'earthaccess'. No window, threshold, season, pair or alpha changed; no verdict had been read."
+    sha256_before: "f1c54e324728abbf6bff0515fb85ba357b1e03e1074bfe26c825ec93c08317b5"
+  - when: "after"
+    what: "input_manifest_sha256 updated: MERRA-2 TQV (water vapour) and SLP (air pressure) added as exploration inputs"
+    reason: "New exploration layers for the globe only: no test is added to either family. The 552 M2TMNXSLV T2M files, the 552 PRECTOTCORR files and the 333 IMERG files keep their SHA-256 (listed per file in the manifest)."
+    sha256_before: "c830182d372dc31258231ef020899d87884e5e70471bb6b4efab6616f68d3e17"
+  - when: "after"
+    what: "input_manifest_sha256 and regions_support_sha256 updated: GLDAS_NOAH10_M 2.1 Evap_tavg, Qs_acc and Qsb_acc (evaporation, runoff) added as exploration inputs, and the definition of its 1-degree land grid (gldas_1deg) added to the grid list of regions/index.json"
+    reason: "Exploration inputs added; pre-registered files unchanged. New exploration layers for the globe and place reports only: no test is added to either family. The 1656 M2TMNXSLV, 552 M2TMNXFLX and 333 IMERG manifest entries are identical (per-file SHA-256). In regions/index.json only the grid definition is added: every region entry (support, inSet, masks) and both pair splits are identical; support on the new grid is applied from its mask files when the bundle is written."
+    sha256_before: "5cfaa6e4e08679c7f3541e59bd7f5ad5d1905398d290e2bac0ec2642d9543070"
+  - when: "after"
+    what: "input_manifest_sha256 and regions_support_sha256 updated: MERRA-2 M2TMNXFLX PRECSNO and SPEED (snowfall, wind speed), GLDAS_NOAH10_M 2.1 SoilMoi0_10cm_inst (topsoil moisture) and MODIS MOD13C2 061 NDVI (plant greenness) added as exploration inputs, and the definition of the MODIS 0.5-degree grid (modis_05deg) added to the grid list of regions/index.json"
+    reason: "New exploration layers only: no test is added to either family. The pre-registered input files keep their SHA-256 (all 1656 M2TMNXSLV, 552 PRECTOTCORR and 333 IMERG files, listed per file in the manifest); regions/index.json differs only by the added grid definition."
+    sha256_before: "2f78c41e9f74e32fdabe5e6832ca51f80e393a7100b5aa27a484b94ed9730177"

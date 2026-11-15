@@ -1,0 +1,17 @@
+.cache/
+.venv/
+node_modules/
+dist/
+__pycache__/
+*.pyc
+.pytest_cache/
+playwright-report/
+test-results/
+
+# Secrets: the copilot relay reads ANTHROPIC_API_KEY from here or from the host; never commit it
+.env
+.env.*
+!.env.example
+
+.vercel
+.env*
