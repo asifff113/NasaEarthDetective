@@ -131,6 +131,8 @@ export function siteCsp(): Plugin {
         "img-src 'self' data: blob:",
         "style-src 'self' 'unsafe-inline'",
         "font-src 'self' data:",
+        // The video tour on the Watch page: only YouTube's no-cookie player may be framed, and only after a click.
+        'frame-src https://www.youtube-nocookie.com',
         ["script-src 'self'", ...inlineScriptHashes(html)].join(' '),
         "object-src 'none'",
         "base-uri 'self'",
