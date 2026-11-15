@@ -248,7 +248,7 @@ results/<buildId>/
 | Offline | "Offline: showing the cases kept on this device" with the list | — |
 
 - No secrets in the repositories or the bundle. EDL credentials live in Actions secrets or the developer's Codespace. A secret scan (gitleaks) runs in CI.
-- The site fetches only its own build's files: Content Security Policy `default-src 'self'; connect-src 'self' <results origin>; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'`. The offline build makes no request.
+- The site fetches only its own build's files: Content Security Policy `default-src 'self'; connect-src 'self' <results origin>; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; frame-src https://www.youtube-nocookie.com`. The one frame is the video tour on the Watch page: it loads only after the visitor presses play. The offline build makes no request (it links to the video instead).
 - No analytics or tracking.
 
 ---
