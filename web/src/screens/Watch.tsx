@@ -11,6 +11,7 @@ import { int, shortHash } from '../i18n/format';
 import type { CaseFile, Contrast, Lineup, Mask, RegionIndex, Verdict } from '../data/types';
 import { caseResultPath, pickLeadCase, useCases } from '../data/cases';
 import { LeadCase } from '../components/HomeGuide';
+import { VideoTour } from '../components/VideoTour';
 import { PlaceStory } from '../report/StoryPlayer';
 import { paths } from '../data/results';
 import { useCatalog, usePrereg, useRegionIndex, useResult, useResults } from '../data/hooks';
@@ -557,6 +558,7 @@ export default function WatchScreen() {
       <>
         <Hero eyebrow={t('site.watch.eyebrow')} title={t('nav.watch')} lead={t('site.watch.lead')} />
         <Body>
+          <VideoTour />
           <WatchStart />
           <section className="mb-10 grid gap-3 rounded-card border border-line bg-surface-2 p-5 sm:grid-cols-3" aria-labelledby="what-case" data-testid="what-case">
             <h2 id="what-case" className="m-0 text-[20px] font-semibold sm:col-span-3">

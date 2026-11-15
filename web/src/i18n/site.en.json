@@ -1065,6 +1065,30 @@
       "way_story": "The story of any place",
       "way_story_body": "Pick any country or region and watch its records play year by year. Values, not tests.",
       "why": "The globe answers one place at a time and the copilot answers in words. A case shows the whole reasoning: what was fixed in advance, what the data say, which checks it passed, and why the answer is what it is."
+    },
+    "tour": {
+      "eyebrow": "Video tour",
+      "title": "CaseFile Earth in eight minutes",
+      "lead": "A narrated tour of the whole site: the globe, any place on Earth, graded verdicts and \"can't tell yet\", comparing two places, the copilot, Bangla, and the NASA data behind every number.",
+      "play": "Play the video tour",
+      "length": "8:18 · English, with subtitles",
+      "chapters": "Chapters of the video tour",
+      "chapter_hint": "Start at a chapter",
+      "youtube": "Watch on YouTube",
+      "voice": "Narration: AI-generated voice. The screens are recordings of this site.",
+      "cta": "Video tour",
+      "ch": {
+        "case": "The case",
+        "globe": "The globe",
+        "years": "Year by year",
+        "place": "Any place on Earth",
+        "verdicts": "The verdicts",
+        "two": "Two places, one question",
+        "ask": "Ask and watch",
+        "trends": "Trends and the copilot",
+        "bangla": "বাংলায় (in Bangla)",
+        "evidence": "The evidence"
+      }
     }
   }
 }

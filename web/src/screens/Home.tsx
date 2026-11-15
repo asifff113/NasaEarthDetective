@@ -3,7 +3,7 @@
 // ways in. The lead case, how a case works and the words we use live on their own pages (Watch, About), reached
 // from the menu, so a phone opens straight onto the globe. The offline file has no globe: it keeps the lead case
 // and the cases saved on this device.
-import { ArrowLeftRight, ArrowRight, HelpCircle, Play } from 'lucide-react';
+import { ArrowLeftRight, ArrowRight, Clapperboard, HelpCircle, Play } from 'lucide-react';
 import { lazy, Suspense } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { useT } from '../i18n';
@@ -89,6 +89,10 @@ export function Home() {
         <a href="#/compare" className={pill} data-testid="cta-compare">
           <ArrowLeftRight className="size-4" aria-hidden="true" />
           {t('home.cta_compare')}
+        </a>
+        <a href="#/watch" className={pill} data-testid="cta-tour">
+          <Clapperboard className="size-4" aria-hidden="true" />
+          {t('site.tour.cta')}
         </a>
       </motion.p>
     </div>
